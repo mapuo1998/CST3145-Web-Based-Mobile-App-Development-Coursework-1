@@ -17,7 +17,27 @@
         <h1 class="app-title">
             <img src="/images/school-icon.svg" alt="School Icon" class="school-icon"> After School App
         </h1>
-        <div class="main-container"></div>
+        <div class="main-container">
+            <!-- Sorting section on the left -->
+            <div class="left-panel">
+                <label><b>Sort By:</b></label>
+                <!-- sorting options using radio buttons -->
+                <div v-for="sortOpt in sortOpts" :key="sortOpt.value">
+                    <input type="radio" :id="sortOpt.id" v-model="selSortAttr" :value="sortOpt.value">
+                    <label :for="sortOpt.id">{{ sortOpt.label }}</label>
+                </div>
+                <label><b>Sort Order:</b></label>
+                <!-- radio buttons -->
+                <div>
+                    <input type="radio" id="ascSort" v-model="selSortOrder" value="asc">
+                    <label for="ascSort">Ascending</label>
+                </div>
+                <div>
+                    <input type="radio" id="descSort" v-model="selSortOrder" value="desc">
+                    <label for="descSort">Descending</label>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Vue.js code -->
@@ -25,14 +45,22 @@
         new Vue({
             el: "#app",
             data: {
+                sortOpts: [
+                    { id: "sortTitle", value: "title", label: "Subject" },
+                    { id: "sortLocation", value: "location", label: "Location" },
+                    { id: "sortPrice", value: "price", label: "Price" },
+                    { id: "sortSpaces", value: "spaces", label: "Availability" },
+                ],
+                selSortAttr: "title",
+                selSortOrder: "asc",
             },
             computed: {
             },
             methods: {
+
             },
         });
     </script>
 </body>
 
 </html>
-

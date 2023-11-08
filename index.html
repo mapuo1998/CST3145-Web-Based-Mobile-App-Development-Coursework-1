@@ -18,16 +18,13 @@
             <img src="/images/school-icon.svg" alt="School Icon" class="school-icon"> After School App
         </h1>
         <div class="main-container">
-            <!-- Sorting section on the left -->
             <div class="left-panel">
                 <label><b>Sort By:</b></label>
-                <!-- sorting options using radio buttons -->
                 <div v-for="sortOpt in sortOpts" :key="sortOpt.value">
                     <input type="radio" :id="sortOpt.id" v-model="selSortAttr" :value="sortOpt.value">
                     <label :for="sortOpt.id">{{ sortOpt.label }}</label>
                 </div>
                 <label><b>Sort Order:</b></label>
-                <!-- radio buttons -->
                 <div>
                     <input type="radio" id="ascSort" v-model="selSortOrder" value="asc">
                     <label for="ascSort">Ascending</label>
@@ -35,6 +32,65 @@
                 <div>
                     <input type="radio" id="descSort" v-model="selSortOrder" value="desc">
                     <label for="descSort">Descending</label>
+                </div>
+            </div>
+            <div class="right-panel">
+                <ol class="cart" v-if="showCart">
+                    <h2>Your Cart</h2>
+                    <li v-for="(item, index) in cartItems" :key="index">
+                        {{ index + 1 }}. {{ item.title }}
+                        <button v-on:click="removeFromCart(index)">Remove from Cart</button>
+                    </li>
+                    <div>
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" v-model="name" placeholder="Enter your name"
+                            v-on:input="validateName">
+                        <p v-if="nameErr" class="error">Name should contain letters only</p>
+                    </div>
+                    <div>
+                        <label for="phone">Phone Number:</label>
+                        <input type="text" id="phone" v-model="phone" placeholder="Enter your phone number"
+                            v-on:input="validatePhone">
+                        <p v-if="phoneErr" class="error">Phone should contain numbers only</p>
+                    </div>
+
+                    <button v-on:click="toggleCartView" class="back-to-lessons-button">Back to Lessons</button>
+                    <button v-on:click="checkout" class="checkout-button" :disabled="!canCheckout">Checkout</button>
+                    <button v-on:click="emptyCart" class="empty-cart-button">Empty Cart</button>
+                </ol>
+
+
+                <div class="search" v-else>
+                    <div class="search-bar">
+                        <div class="search-input">
+                            <input v-model="searchTerm" placeholder="Search Lessons..">
+                        </div>
+                    </div>
+                    <ul>
+                        <li v-for="lesson in filteredLessons" :key="lesson.id">
+                            <div class="lesson-info">
+                                <img :src="getLessonImage(lesson.title)" :alt="lesson.title + ' Icon'"
+                                    class="lesson-icon">
+                                <br>
+                                <span>
+                                    <strong>{{ lesson.title }}</strong>
+                                    <br>
+                                    Location: <strong>{{ lesson.location }}</strong>
+                                    <br>
+                                    Price: <strong>£{{ lesson.price }}</strong>
+                                    <br>
+                                    Spaces: <strong>{{ lesson.spaces }}</strong>
+                                </span>
+                            </div>
+                            <button v-on:click="addToCart(lesson)" :disabled="lesson.spaces === 0">Add to Cart</button>
+                        </li>
+                    </ul>
+                    <div class="view-cart">
+                        <button v-on:click="toggleCartView" :disabled="cartItems.length === 0">
+                            {{ cartItems.length === 0 ? 'Cart is Empty' : (showCart ? 'Back to Lessons' : 'View Cart')
+                            }}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -51,13 +107,100 @@
                     { id: "sortPrice", value: "price", label: "Price" },
                     { id: "sortSpaces", value: "spaces", label: "Availability" },
                 ],
+                cartItems: [],
+                name: "",
+                phone: "",
+                isOrderSubmitted: false,
+                nameErr: false,
+                phoneErr: false,
+                searchTerm: "",
                 selSortAttr: "title",
                 selSortOrder: "asc",
+                lessons: lessons,
+                showCart: false,
             },
             computed: {
+                canCheckout() {
+                    return this.name.length > 0 && !this.nameErr && this.phone.length > 0 && !this.phoneErr && this.cartItems.length > 0;
+                },
+                filteredLessons() {
+                    return this.sortLessons(this.lessons).filter(lesson => lesson.title.toLowerCase().includes(this.searchTerm.toLowerCase()));
+                },
             },
             methods: {
+                getLessonImage(title) {
+                    const imgMap = {
+                        "Maths": "images/math-icon.svg",
+                        "History": "images/history-icon.svg",
+                        "Science": "images/science-icon.svg",
+                        "Art": "images/art-icon.svg",
+                        "Music": "images/music-icon.svg",
+                        "Programming": "images/programming-icon.svg",
+                        "English": "images/english-icon.svg",
+                        "PE": "images/PE-icon.svg",
+                        "Chemistry": "images/chemistry-icon.svg",
+                        "Geography": "images/geography-icon.svg",
+                    };
+                    return imgMap[title] || "";
+                },
+                checkout() {
+                    if (this.canCheckout) {
+                        alert("Thank you for your purchase!");
+                        this.isOrderSubmitted = true;
+                        window.location.reload();
+                    }
+                },
+                sortLessons(lessons) {
+                    return lessons.slice().sort((a, b) => {
+                        const attr = this.selSortAttr;
+                        const order = this.selSortOrder === "asc" ? 1 : -1;
 
+                        if (attr === "location") {
+                            const numA = parseInt(a.location.match(/\d+/)[0]);
+                            const numB = parseInt(b.location.match(/\d+/)[0]);
+                            return (numA - numB) * order;
+                        }
+
+                        return (a[attr] < b[attr] ? -1 : 1) * order;
+                    });
+                },
+                addToCart(lesson) {
+                    if (lesson.spaces > 0) {
+                        lesson.spaces -= 1;
+                        this.cartItems.push({ ...lesson });
+                    }
+                },
+                removeFromCart(index) {
+                    const item = this.cartItems[index];
+                    this.cartItems.splice(index, 1);
+                    const lesson = this.lessons.find(lesson => lesson.title === item.title);
+                    if (lesson) {
+                        lesson.spaces += 1;
+                    }
+                },
+                emptyCart() {
+                    for (const item of this.cartItems) {
+                        const lesson = this.lessons.find(lesson => lesson.title === item.title);
+                        if (lesson) {
+                            lesson.spaces += 1;
+                        }
+                    }
+                    this.cartItems = [];
+                },
+                toggleCartView() {
+                    this.showCart = !this.showCart;
+                },
+                validateName() {
+                    this.nameErr = !/^[A-Za-z\s]+$/.test(this.name);
+                    this.updateCheckoutButton();
+                },
+                validatePhone() {
+                    this.phoneErr = !/^\d+$/.test(this.phone);
+                    this.updateCheckoutButton();
+                },
+                updateCheckoutButton() {
+                    this.canCheckout = this.name.length > 0 && !this.nameErr && this.phone.length > 0 && !this.phoneErr && this.cartItems.length > 0;
+                },
             },
         });
     </script>

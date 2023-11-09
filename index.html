@@ -133,14 +133,17 @@
                 showCart: false,
             },
             computed: {
+                //is checkout enabled
                 canCheckout() {
                     return this.name.length > 0 && !this.nameErr && this.phone.length > 0 && !this.phoneErr && this.cartItems.length > 0;
                 },
+                //filter and sort lessons
                 filteredLessons() {
                     return this.sortLessons(this.lessons).filter(lesson => lesson.title.toLowerCase().includes(this.searchTerm.toLowerCase()));
                 },
             },
             methods: {
+                //get images
                 getLessonImage(title) {
                     const imgMap = {
                         "Maths": "images/math-icon.svg",
@@ -156,6 +159,7 @@
                     };
                     return imgMap[title] || "";
                 },
+                //checkout process
                 checkout() {
                     if (this.canCheckout) {
                         alert("Thank you for your purchase!");
@@ -163,6 +167,7 @@
                         window.location.reload();
                     }
                 },
+                //sort lessons
                 sortLessons(lessons) {
                     return lessons.slice().sort((a, b) => {
                         const attr = this.selSortAttr;
@@ -177,12 +182,14 @@
                         return (a[attr] < b[attr] ? -1 : 1) * order;
                     });
                 },
+                //add a lesson
                 addToCart(lesson) {
                     if (lesson.spaces > 0) {
                         lesson.spaces -= 1;
                         this.cartItems.push({ ...lesson });
                     }
                 },
+                //remove a lesson
                 removeFromCart(index) {
                     const item = this.cartItems[index];
                     this.cartItems.splice(index, 1);
@@ -191,6 +198,7 @@
                         lesson.spaces += 1;
                     }
                 },
+                //empty shopping cart
                 emptyCart() {
                     for (const item of this.cartItems) {
                         const lesson = this.lessons.find(lesson => lesson.title === item.title);
@@ -200,17 +208,21 @@
                     }
                     this.cartItems = [];
                 },
+                //toggle between cart and lessons
                 toggleCartView() {
                     this.showCart = !this.showCart;
                 },
+                //validate name
                 validateName() {
                     this.nameErr = !/^[A-Za-z\s]+$/.test(this.name);
                     this.updateCheckoutButton();
                 },
+                //validate phone
                 validatePhone() {
                     this.phoneErr = !/^\d+$/.test(this.phone);
                     this.updateCheckoutButton();
                 },
+                //update checkout button
                 updateCheckoutButton() {
                     this.canCheckout = this.name.length > 0 && !this.nameErr && this.phone.length > 0 && !this.phoneErr && this.cartItems.length > 0;
                 },

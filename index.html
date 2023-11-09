@@ -2,8 +2,13 @@
 <html>
 
 <head>
+    <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="styles.css">
+
+    <!-- Vue.js -->
     <script src="https://unpkg.com/vue@2.7.8/dist/vue.js"></script>
+
+    <!-- JavaScript -->
     <script src="classes.js"></script>
 </head>
 
@@ -13,13 +18,16 @@
             <img src="/images/school-icon.svg" alt="School Icon" class="school-icon"> After School App
         </h1>
         <div class="main-container">
+            <!-- sorting section on the left -->
             <div class="left-panel">
                 <label><b>Sort By:</b></label>
+                <!-- sorting options using radio buttons -->
                 <div v-for="sortOpt in sortOpts" :key="sortOpt.value">
                     <input type="radio" :id="sortOpt.id" v-model="selSortAttr" :value="sortOpt.value">
                     <label :for="sortOpt.id">{{ sortOpt.label }}</label>
                 </div>
                 <label><b>Sort Order:</b></label>
+                <!-- radio buttons -->
                 <div>
                     <input type="radio" id="ascSort" v-model="selSortOrder" value="asc">
                     <label for="ascSort">Ascending</label>
@@ -30,9 +38,12 @@
                 </div>
             </div>
 
+            <!-- shopping cart and lessons section -->
             <div class="right-panel">
                 <ol class="cart" v-if="showCart">
+                    <!-- show cart if showcart true -->
                     <h2>Your Cart</h2>
+                    <!-- list items -->
                     <li v-for="(item, index) in cartItems" :key="index">
                         {{ index + 1 }}. {{ item.title }}
                         <button v-on:click="removeFromCart(index)">Remove from Cart</button>
@@ -51,17 +62,24 @@
                     </div>
 
                     <button v-on:click="toggleCartView" class="back-to-lessons-button">Back to Lessons</button>
+
+                    <!-- toggle between cart and lessons and checkout button -->
                     <button v-on:click="checkout" class="checkout-button" :disabled="!canCheckout">Checkout</button>
+
+                    <!-- empty cart button -->
                     <button v-on:click="emptyCart" class="empty-cart-button">Empty Cart</button>
                 </ol>
 
+
                 <div class="search" v-else>
+                    <!-- search input and lessons show if showcart false -->
                     <div class="search-bar">
                         <div class="search-input">
                             <input v-model="searchTerm" placeholder="Search Lessons..">
                         </div>
                     </div>
                     <ul>
+                        <!-- filtered lessons -->
                         <li v-for="lesson in filteredLessons" :key="lesson.id">
                             <div class="lesson-info">
                                 <img :src="getLessonImage(lesson.title)" :alt="lesson.title + ' Icon'"
@@ -91,6 +109,7 @@
         </div>
     </div>
 
+    <!-- Vue.js code -->
     <script>
         new Vue({
             el: "#app",
@@ -101,17 +120,17 @@
                     { id: "sortPrice", value: "price", label: "Price" },
                     { id: "sortSpaces", value: "spaces", label: "Availability" },
                 ],
-                selSortAttr: "title",
-                selSortOrder: "asc",
                 cartItems: [],
                 name: "",
                 phone: "",
                 isOrderSubmitted: false,
                 nameErr: false,
                 phoneErr: false,
-                showCart: false,
                 searchTerm: "",
+                selSortAttr: "title",
+                selSortOrder: "asc",
                 lessons: lessons,
+                showCart: false,
             },
             computed: {
                 canCheckout() {

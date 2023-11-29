@@ -139,7 +139,9 @@
                 },
                 //filter and sort lessons
                 filteredLessons() {
-                    return this.sortLessons(this.lessons).filter(lesson => lesson.title.toLowerCase().includes(this.searchTerm.toLowerCase()));
+                    return this.sortLessons(this.lessons).filter((lesson) => {
+                        return lesson.title.toLowerCase().includes(this.searchTerm.toLowerCase()) || lesson.location.toLowerCase().includes(this.searchTerm.toLowerCase())
+                    });
                 },
             },
             methods: {
